@@ -14,7 +14,7 @@ export default defineConfig({
   output: {
     dir: 'dist',
     format: 'umd',
-    name: 'MyLib',
+    name: 'FastCopyDir',
   },
   external: Object.keys((pkg as any).peerDependencies || {}),
   plugins: [
@@ -32,13 +32,10 @@ export default defineConfig({
     ts({
       tsconfig: path.resolve(__dirname, './tsconfig.build.json'),
     }),
-    babel({
-      babelHelpers: 'runtime',
-    }),
     // 生成包大小监控
     sizes(100),
     // 代码混淆
-    terser(),
+    // terser(),
     // 警告
     beep(),
   ],

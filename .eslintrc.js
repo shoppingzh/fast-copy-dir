@@ -10,7 +10,8 @@ module.exports = {
   extends: [
     '@shoppingzh', //
     'plugin:@typescript-eslint/recommended',
-    'prettier',
   ],
-  rules: {},
+  rules: {
+    'no-promise-executor-return': [0],
+  },
 }
