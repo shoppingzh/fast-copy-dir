@@ -28,12 +28,17 @@ async function getIncludes(relativePath: string, excludes?: string[]) {
 function rmdir(dirpath: string, excludes?: string[]) {
   return new Promise<boolean>(async(resolve, reject) => {
     if (!await fs.exists(dirpath)) return reject('目标目录不存在！')
-    if (!excludes || !excludes.length) return rimraf.rimraf(dirpath)
+    if (!excludes || !excludes.length) {
+      try {
+        resolve(rimraf.rimraf(dirpath))
+      } catch (err) {
+        return reject(err)
+      }
+    }
     const matchList = await getIncludes(dirpath, excludes)
     const result = await Promise.all(
       matchList.map(filepath => rimraf.rimraf(path.resolve(dirpath, filepath)))
     )
-    console.log(result)
     resolve(result.every(o => !!o))
   })
 }
@@ -45,17 +50,21 @@ export function copy(src: string, dest: string, options?: Options) {
       if (opts.cleanDest) {
         console.log('删除目标目录')
         await rmdir(dest, opts.cleanDestExcludes)
+        console.log('删除目标目录完成')
       }
       const matchList = await getIncludes(src, opts.excludes)
       console.log('开始复制')
       console.log(matchList)
-      // await Promise.all(
-      //   matchList.map(filepath => fs.copy(path.resolve(src, filepath), path.resolve(dest, filepath)))
-      // )
+      await Promise.all(
+        matchList.map(filepath => fs.copy(path.resolve(src, filepath), path.resolve(dest, filepath), {
+          dereference: true,
+        }))
+      )
       console.log('复制完成')
 
       resolve()
     } catch (err) {
+      console.error(err)
       reject(err)
     }
 
